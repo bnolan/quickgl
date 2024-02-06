@@ -128,20 +128,15 @@ int main() {
   int frameCount = 0;
 
   while (running) {
-    SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255); // RGBA for black
+    // Off black
+    SDL_SetRenderDrawColor(renderer, 32, 32, 32, 255);
     SDL_RenderClear(renderer);
     
-    // set color to yellow (RGBA)
-    //SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255); // RGBA for yellow
-
-    // Create a rect at position (50, 50) that's 100x100 pixels
-    //SDL_Rect fillRect = {10, 10, 460, 460};
-    //SDL_RenderFillRect(renderer, &fillRect);
-
     // Set text to render
     std::string counterText = getCounterText(ctx, frameCount++);
 
-    SDL_Color textColor = {255, 255, 0, 255}; // Yellow
+    // Off white
+    SDL_Color textColor = {220, 220, 220, 255};
     SDL_Surface* textSurface = TTF_RenderText_Blended(font, counterText.c_str(), textColor);
     SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
 
