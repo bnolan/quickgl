@@ -35,7 +35,7 @@ void drawTriangle(JSContext *ctx) {
   JSValue result = JS_Eval(ctx, jsCode.c_str(), jsCode.length(), "<input>",
                            JS_EVAL_TYPE_GLOBAL);
 
-  // JS_FreeValue(ctx, result);
+  JS_FreeValue(ctx, result);
 }
 
 void draw(JSContext *ctx) {
