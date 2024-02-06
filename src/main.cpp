@@ -1096,35 +1096,9 @@ int main() {
   while (running) {
     cap >> frame; // Capture a frame
 
-    // Convert frame to SDL texture
+    // Convert frame to a tinygl texture
     cv::Mat frameRGB;
     cv::cvtColor(frame, frameRGB, cv::COLOR_BGR2RGB);
-
-    // For color images, apply equalization to the Y channel in YCrCb color
-    // space
-    // cv::Mat imgYCrCb;
-    // cv::cvtColor(frame, imgYCrCb, cv::COLOR_BGR2YCrCb);
-
-    // std::vector<cv::Mat> channels;
-    // cv::split(imgYCrCb, channels);
-    // cv::equalizeHist(channels[0], channels[0]);
-    // cv::merge(channels, imgYCrCb);
-    // cv::cvtColor(imgYCrCb, frameRGB, cv::COLOR_YCrCb2RGB);
-
-    // if (!cameraTexture) {
-    //   cameraTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGB24,
-    //                                     SDL_TEXTUREACCESS_STREAMING,
-    //                                     frame.cols, frame.rows);
-    // }
-    // SDL_UpdateTexture(cameraTexture, NULL, frameRGB.data, frameRGB.step);
-
-    // Off black
-    // SDL_SetRenderDrawColor(renderer, 32, 32, 32, 255);
-    // SDL_RenderClear(renderer);
-
-    // TinyGL rendering commands
-    // glClearColor(0.0, 0.0, 0.0, 1.0);
-    // glClear(GL_COLOR_BUFFER_BIT);
 
     cv::Mat crop = resizeAndCropToSquare(frameRGB, 480);
     cv::Mat temp;
@@ -1142,10 +1116,6 @@ int main() {
               cv::Size(faces[i].width * 0.5, faces[i].height * 0.5), 0, 0, 360,
               cv::Scalar(255, 0, 255), 4, 8, 0);
     }
-    // glGenTextures(1, &textureID);
-    // glBindTexture(GL_TEXTURE_2D, textureID);
-    // glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 480, 480, 0, GL_RGB,
-    //              GL_UNSIGNED_SHORT, temp.data);
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -1187,12 +1157,6 @@ int main() {
     memcpy(pixels, zbuffer->pbuf, 480 * 480 * 2);
     SDL_UnlockTexture(albedoTexture);
 
-    // Clear screen and render the texture
-    // SDL_RenderClear(renderer);
-    // SDL_RenderCopy(renderer, cameraTexture, NULL, NULL);
-
-    // Blend the SDL texture
-    // SDL_SetTextureBlendMode(albedoTexture, SDL_BLENDMODE_ADD);
     SDL_RenderCopy(renderer, albedoTexture, NULL, NULL);
 
     // Set text to render
