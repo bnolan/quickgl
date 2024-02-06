@@ -1,3 +1,6 @@
+**/.DS_Store
 third_party/quickjs/.obj
 third_party/quickjs/*.a
+third_party/tinygl/lib/*.a
+third_party/tinygl/src/*.o
 

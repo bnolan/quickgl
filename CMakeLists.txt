@@ -21,9 +21,16 @@ set_target_properties(QuickJS PROPERTIES
     IMPORTED_LOCATION "${PROJECT_SOURCE_DIR}/third_party/quickjs/libquickjs.a"
     INTERFACE_INCLUDE_DIRECTORIES "${PROJECT_SOURCE_DIR}/third_party/quickjs")
 
+# Add TinyGL
+add_library(TinyGL STATIC IMPORTED)
+set_target_properties(TinyGL PROPERTIES
+    IMPORTED_LOCATION "${PROJECT_SOURCE_DIR}/third_party/tinygl/lib/libTinyGL.a"
+    INTERFACE_INCLUDE_DIRECTORIES "${PROJECT_SOURCE_DIR}/third_party/quickjs")
+
 # Link QuickJS with your project
 target_link_libraries(QuickGL 
   QuickJS 
+  TinyGL
   ${SDL2_LIBRARIES}
   ${SDL2TTF_LIBRARY}
   )
@@ -33,6 +40,7 @@ target_include_directories(QuickGL PUBLIC
   "${PROJECT_BINARY_DIR}" 
   include/ 
   "${PROJECT_SOURCE_DIR}/third_party/quickjs"
+  "${PROJECT_SOURCE_DIR}/third_party/tinygl/include"
   ${SDL2_INCLUDE_DIRS}
   ${SDL2TTF_INCLUDE_DIR}
 )

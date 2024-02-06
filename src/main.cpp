@@ -3,7 +3,70 @@
 #include <iostream>
 
 extern "C" {
+
+#include "GL/gl.h"
 #include "quickjs.h"
+#include "zbuffer.h"
+#define CHAD_API_IMPL
+#define CHAD_MATH_IMPL
+#include "3dMath.h"
+}
+
+#define M_PI 3.14159265
+
+double time_passed = 0.0;
+int winSizeX = 480;
+int winSizeY = 480;
+
+void draw() {
+  // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  // glEnable(GL_TEXTURE_2D);
+  // glBindTexture(GL_TEXTURE_2D,tex);
+  // time_passed += 0.0166666;
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+  glPushMatrix();
+  glRotatef(time_passed, 0, 0, 1);
+  glBegin(GL_TRIANGLES);
+  glColor3f(0.2, 0.2, 1.0); // BLUE!
+  // glColor3f(1.0, 0.2, 0.2); //RED!
+  glVertex3f(-0.8, -0.8, 0.2);
+
+  glColor3f(0.2, 1.0, 0.2); // GREEN!
+  // glColor3f(1.0, 0.2, 0.2); //RED!
+  glVertex3f(0.8, -0.8, 0.2);
+
+  glColor3f(1.0, 0.2, 0.2); // RED!
+  glVertex3f(0, 1.2, 0.2);
+  glEnd();
+  glPopMatrix();
+}
+
+void initScene() {
+
+  // glLightfv( GL_LIGHT0, GL_AMBIENT, white);
+  // glLightfv( GL_LIGHT0, GL_SPECULAR, white);
+  // glEnable( GL_CULL_FACE );
+  glDisable(GL_CULL_FACE);
+  glEnable(GL_LIGHTING);
+  glDisable(GL_TEXTURE_2D);
+  glDisable(GL_LIGHTING);
+  // glEnable( GL_LIGHT0 );
+  glEnable(GL_DEPTH_TEST);
+  glShadeModel(GL_SMOOTH);
+  glTextSize(GL_TEXT_SIZE24x24);
+  /*
+  {
+          int sw = 0, sh = 0, sc = 0; //sc goes unused.
+          uchar* source_data = stbi_load("texture.png", &sw, &sh, &sc, 3);
+          if(source_data){
+                  tex = loadRGBTexture(source_data, sw, sh);
+                  free(source_data);
+          } else {
+                  printf("\nCan't load texture!\n");
+          }
+  }*/
+  glEnable(GL_NORMALIZE);
 }
 
 std::string getCounterText(JSContext *ctx, int frameCount) {
