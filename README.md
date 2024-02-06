@@ -2,8 +2,7 @@
 
 A javascript runtime with (incomplete) tinygl and opencv bindings for experimenting with mixed reality.
 
-<img width="566" alt="Screenshot 2024-02-06 at 9 08 04 PM" src="https://github.com/bnolan/quickgl/assets/17499/2b099ffe-1d4a-4ce5-a8e1-fd51f8430596">
-
+<img width="533" alt="Screenshot 2024-02-06 at 10 16 26 PM" src="https://github.com/bnolan/quickgl/assets/17499/ae021156-da43-423e-a61c-1949bd63d72f">
 
 ## Configuring on MacOS
 
