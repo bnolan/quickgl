@@ -1,6 +1,8 @@
 #include <SDL.h>
 #include <SDL_ttf.h>
 #include <iostream>
+#include <opencv2/objdetect.hpp> // Include the header file for object detection
+#include <opencv2/objdetect/objdetect.hpp>
 #include <opencv2/opencv.hpp>
 
 extern "C" {
@@ -13,6 +15,8 @@ extern "C" {
 #define CHAD_MATH_IMPL
 #include "3dMath.h"
 }
+
+cv::CascadeClassifier face_cascade;
 
 int winSizeX = 480;
 int winSizeY = 480;
@@ -1086,6 +1090,9 @@ int main() {
 
   int frameCount = 0;
 
+  // Load face cascade
+  face_cascade.load("../data/haarcascade_frontalface_default.xml");
+
   while (running) {
     cap >> frame; // Capture a frame
 
@@ -1123,6 +1130,18 @@ int main() {
     cv::Mat temp;
     crop.convertTo(temp, CV_8U);
 
+    std::vector<cv::Rect> faces;
+    face_cascade.detectMultiScale(
+        temp, faces, 1.2, 5, 0 | cv::CASCADE_SCALE_IMAGE, cv::Size(80, 80));
+
+    // Here you can use the positions of the faces for whatever you need
+    for (size_t i = 0; i < faces.size(); i++) {
+      cv::Point center(faces[i].x + faces[i].width * 0.5,
+                       faces[i].y + faces[i].height * 0.5);
+      ellipse(temp, center,
+              cv::Size(faces[i].width * 0.5, faces[i].height * 0.5), 0, 0, 360,
+              cv::Scalar(255, 0, 255), 4, 8, 0);
+    }
     // glGenTextures(1, &textureID);
     // glBindTexture(GL_TEXTURE_2D, textureID);
     // glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 480, 480, 0, GL_RGB,
