@@ -2,7 +2,8 @@
 
 A javascript runtime with tinygl bindings.
 
-<img width="522" alt="Screenshot 2024-02-06 at 5 40 29 PM" src="https://github.com/bnolan/quickgl/assets/17499/8680ce19-96db-4154-a04e-72f9a7dfb998">
+<img width="545" alt="Screenshot 2024-02-06 at 6 22 25 PM" src="https://github.com/bnolan/quickgl/assets/17499/8a81fd01-36b1-464d-91cc-0c83e56ed4a9">
+
 
 ## Configuring on MacOS
 
