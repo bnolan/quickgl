@@ -1071,7 +1071,18 @@ Object.assign(TinyGL, {
 
     // Convert frame to SDL texture
     cv::Mat frameRGB;
-    cv::cvtColor(frame, frameRGB, cv::COLOR_BGR2RGB);
+    // cv::cvtColor(frame, frameRGB, cv::COLOR_BGR2RGB);
+
+    // For color images, apply equalization to the Y channel in YCrCb color
+    // space
+    cv::Mat imgYCrCb;
+    cv::cvtColor(frame, imgYCrCb, cv::COLOR_BGR2YCrCb);
+
+    std::vector<cv::Mat> channels;
+    cv::split(imgYCrCb, channels);
+    cv::equalizeHist(channels[0], channels[0]);
+    cv::merge(channels, imgYCrCb);
+    cv::cvtColor(imgYCrCb, frameRGB, cv::COLOR_YCrCb2RGB);
 
     if (!cameraTexture) {
       cameraTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGB24,
@@ -1085,7 +1096,7 @@ Object.assign(TinyGL, {
     // SDL_RenderClear(renderer);
 
     // TinyGL rendering commands
-    glClearColor(0.2, 0.2, 0.2, 1.0);
+    glClearColor(0.0, 0.0, 0.0, 1.0);
     glClear(GL_COLOR_BUFFER_BIT);
 
     draw(ctx);
@@ -1102,7 +1113,7 @@ Object.assign(TinyGL, {
     SDL_RenderClear(renderer);
     SDL_RenderCopy(renderer, cameraTexture, NULL, NULL);
 
-    // Render the SDL texture
+    // Blend the SDL texture
     SDL_SetTextureBlendMode(albedoTexture, SDL_BLENDMODE_ADD);
     SDL_RenderCopy(renderer, albedoTexture, NULL, NULL);
 
