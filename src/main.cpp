@@ -66,34 +66,49 @@ void initScene() {
   glEnable(GL_NORMALIZE);
 }
 
+// Wrapper for glColor3f
+static JSValue js_glColor3f(JSContext *ctx, JSValueConst this_val, int argc,
+                            JSValueConst *argv) {
+  double r, g, b;
+
+  // Extract the arguments from JavaScript
+  JS_ToFloat64(ctx, &r, argv[0]);
+  JS_ToFloat64(ctx, &g, argv[1]);
+  JS_ToFloat64(ctx, &b, argv[2]);
+
+  // Call the actual TinyGL function
+  glColor3f((float)r, (float)g, (float)b);
+
+  return JS_UNDEFINED;
+}
+
+// Wrapper for glVertex3f
+static JSValue js_glVertex3f(JSContext *ctx, JSValueConst this_val, int argc,
+                             JSValueConst *argv) {
+  double x, y, z;
+
+  // Extract the arguments from JavaScript
+  JS_ToFloat64(ctx, &x, argv[0]);
+  JS_ToFloat64(ctx, &y, argv[1]);
+  JS_ToFloat64(ctx, &z, argv[2]);
+
+  // Call the actual TinyGL function
+  glVertex3f((float)x, (float)y, (float)z);
+
+  return JS_UNDEFINED;
+}
+
+void js_tinygl_init(JSContext *ctx, JSValue ns) {
+  // Register each function manually
+  JS_SetPropertyStr(ctx, ns, "glColor3f",
+                    JS_NewCFunction(ctx, js_glColor3f, "glColor3f", 3));
+  JS_SetPropertyStr(ctx, ns, "glVertex3f",
+                    JS_NewCFunction(ctx, js_glVertex3f, "glVertex3f", 3));
+  // Add more functions as needed
+}
+
 std::string getCounterText(JSContext *ctx, int frameCount) {
-  // Define the JavaScript code that generates the counter text
-  std::string jsCode = R"XX(
-
-    function triangleWave(x, period, min, max) {
-      const amplitude = max - min;
-      const phase = x % period;
-      const ascending = 2 * phase / period;
-      if (ascending < 1) {
-        return min + amplitude * ascending;
-      } else {
-        return max - amplitude * (ascending - 1);
-      }
-    }
-
-    function sineWave(x, period, min, max) {
-      return (Math.sin(x / period * 3.14) + 1) * 0.5 * (max-min) + min * 2
-    }
-
-    function getCounterText(count) { 
-      var width = 20
-      var position = sineWave(count, 30, 0, width)
-      return "lol: " + ('-'.repeat(position) + '#' + '-'.repeat(width - position))
-    }; 
-
-)XX";
-
-  jsCode += "getCounterText(" + std::to_string(frameCount) + ");";
+  std::string jsCode = "getCounterText(" + std::to_string(frameCount) + ");";
 
   // Evaluate the JavaScript code
   JSValue result = JS_Eval(ctx, jsCode.c_str(), jsCode.length(), "<input>",
@@ -161,24 +176,47 @@ int main() {
   JSRuntime *rt = JS_NewRuntime();
   JSContext *ctx = JS_NewContext(rt);
 
-  // Your JavaScript code as a string
-  const char *jsCode = "2 + 2";
+  JSValue tinyglNamespace = JS_NewObject(ctx);
+  js_tinygl_init(ctx, tinyglNamespace);
+  JS_SetPropertyStr(ctx, JS_GetGlobalObject(ctx), "TinyGL", tinyglNamespace);
+
+  // If adding to the global namespace:
+  js_tinygl_init(ctx, JS_GetGlobalObject(ctx));
+
+  // Define the JavaScript code that generates the counter text
+  std::string jsCode = R"XX(
+
+    function triangle () {
+      TinyGL.glColor3f(1.0, 0.0, 0.0); // Set color to red
+      TinyGL.glVertex3f(0.0, 0.0, 0.0); // Specify a vertex
+    }
+
+    function triangleWave(x, period, min, max) {
+      const amplitude = max - min;
+      const phase = x % period;
+      const ascending = 2 * phase / period;
+      if (ascending < 1) {
+        return min + amplitude * ascending;
+      } else {
+        return max - amplitude * (ascending - 1);
+      }
+    }
+
+    function sineWave(x, period, min, max) {
+      return (Math.sin(x / period * 3.14) + 1) * 0.5 * (max-min) + min * 2
+    }
+
+    function getCounterText(count) { 
+      var width = 20
+      var position = sineWave(count, 30, 0, width)
+      return "lol: " + ('-'.repeat(position) + '#' + '-'.repeat(width - position))
+    }; 
+
+)XX";
 
   // Evaluate the JavaScript code
-  JSValue result =
-      JS_Eval(ctx, jsCode, strlen(jsCode), "<evalScript>", JS_EVAL_TYPE_GLOBAL);
-
-  const char *text;
-
-  // Check if the evaluation was successful
-  if (JS_IsException(result)) {
-    std::cerr << "JavaScript evaluation resulted in an exception." << std::endl;
-  } else {
-    // Convert the result to a C string and print it
-    text = JS_ToCString(ctx, result);
-    std::cout << "Result of `" << jsCode << "` is " << text << std::endl;
-    // JS_FreeCString(ctx, resultStr); // Free the C string
-  }
+  JSValue result = JS_Eval(ctx, jsCode.c_str(), jsCode.length(), "<input>",
+                           JS_EVAL_TYPE_GLOBAL);
 
   // Render...
 
