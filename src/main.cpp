@@ -778,13 +778,13 @@ void drawTriangle(JSContext *ctx) {
     TinyGL.glBegin(TinyGL.TRIANGLES);
 
     TinyGL.glColor3f(0.2, 0.2, 0.2);
-    TinyGL.glVertex3f(-0.8, -0.8, 0.2);
+    TinyGL.glVertex3f(-0.2, -0.2, 0.2);
 
     TinyGL.glColor3f(0.5, 0.5, 0.5);
-    TinyGL.glVertex3f(0.8, -0.8, 0.2);
+    TinyGL.glVertex3f(0.2, -0.2, 0.2);
 
     TinyGL.glColor3f(0.6, 0.6, 0.6);
-    TinyGL.glVertex3f(0, 0.8, 0.2);
+    TinyGL.glVertex3f(0, 0.2, 0.2);
 
     TinyGL.glEnd();
     TinyGL.glPopMatrix();
@@ -1087,18 +1087,18 @@ int main() {
 
     // Convert frame to SDL texture
     cv::Mat frameRGB;
-    // cv::cvtColor(frame, frameRGB, cv::COLOR_BGR2RGB);
+    cv::cvtColor(frame, frameRGB, cv::COLOR_BGR2RGB);
 
     // For color images, apply equalization to the Y channel in YCrCb color
     // space
-    cv::Mat imgYCrCb;
-    cv::cvtColor(frame, imgYCrCb, cv::COLOR_BGR2YCrCb);
+    // cv::Mat imgYCrCb;
+    // cv::cvtColor(frame, imgYCrCb, cv::COLOR_BGR2YCrCb);
 
-    std::vector<cv::Mat> channels;
-    cv::split(imgYCrCb, channels);
-    cv::equalizeHist(channels[0], channels[0]);
-    cv::merge(channels, imgYCrCb);
-    cv::cvtColor(imgYCrCb, frameRGB, cv::COLOR_YCrCb2RGB);
+    // std::vector<cv::Mat> channels;
+    // cv::split(imgYCrCb, channels);
+    // cv::equalizeHist(channels[0], channels[0]);
+    // cv::merge(channels, imgYCrCb);
+    // cv::cvtColor(imgYCrCb, frameRGB, cv::COLOR_YCrCb2RGB);
 
     // if (!cameraTexture) {
     //   cameraTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGB24,
