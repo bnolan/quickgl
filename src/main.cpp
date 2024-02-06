@@ -26,7 +26,7 @@ void draw() {
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
   glPushMatrix();
-  glRotatef(time_passed, 0, 0, 1);
+  glRotatef(time_passed * 360, 0, 0, 1);
   glBegin(GL_TRIANGLES);
   glColor3f(0.2, 0.2, 1.0); // BLUE!
   // glColor3f(1.0, 0.2, 0.2); //RED!
@@ -132,18 +132,25 @@ int main() {
 
   SDL_Window *window = SDL_CreateWindow("QuickGL", SDL_WINDOWPOS_CENTERED,
                                         SDL_WINDOWPOS_CENTERED, 480, 480, 0);
+
   if (!window) {
     SDL_Log("Failed to create window: %s", SDL_GetError());
     return 3;
   }
 
-  SDL_Renderer *renderer =
-      SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+  SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, 0);
   if (!renderer) {
     SDL_Log("Failed to create renderer: %s", SDL_GetError());
     SDL_DestroyWindow(window);
     return 4;
   }
+
+  SDL_Texture *albedoTexture = SDL_CreateTexture(
+      renderer, SDL_PIXELFORMAT_RGB565, SDL_TEXTUREACCESS_STREAMING, 480, 480);
+
+  // Initialize TinyGL
+  ZBuffer *zbuffer = ZB_open(480, 480, ZB_MODE_RGBA, NULL);
+  glInit(zbuffer);
 
   // QuickJS
 
@@ -197,6 +204,22 @@ int main() {
     SDL_SetRenderDrawColor(renderer, 32, 32, 32, 255);
     SDL_RenderClear(renderer);
 
+    // TinyGL rendering commands
+    glClearColor(0.1, 0.2, 0.3, 1.0);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    draw();
+
+    // Copy the TinyGL framebuffer to the SDL texture
+    void *pixels;
+    int pitch;
+    SDL_LockTexture(albedoTexture, NULL, &pixels, &pitch);
+    memcpy(pixels, zbuffer->pbuf, 480 * 480 * 2);
+    SDL_UnlockTexture(albedoTexture);
+
+    // Render the SDL texture
+    SDL_RenderCopy(renderer, albedoTexture, NULL, NULL);
+
     // Set text to render
     std::string counterText = getCounterText(ctx, frameCount++);
 
@@ -219,6 +242,8 @@ int main() {
     SDL_DestroyTexture(textTexture);
 
     SDL_Delay(1000 / 60); // Approximately 60 frames per second
+
+    time_passed += 1.0 / 60;
 
     while (SDL_PollEvent(&event)) {
       if (event.type == SDL_QUIT) {
