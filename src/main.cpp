@@ -4,6 +4,7 @@
 
 extern "C" {
 
+#define TGL_FEATURE_16_BITS 1
 #include "GL/gl.h"
 #include "quickjs.h"
 #include "zbuffer.h"
@@ -11,8 +12,6 @@ extern "C" {
 #define CHAD_MATH_IMPL
 #include "3dMath.h"
 }
-
-#define M_PI 3.14159265
 
 double time_passed = 0.0;
 int winSizeX = 480;
@@ -26,7 +25,7 @@ void draw() {
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
   glPushMatrix();
-  glRotatef(time_passed * 360, 0, 0, 1);
+  glRotatef(time_passed * 90, 0, 0, 1);
   glBegin(GL_TRIANGLES);
   glColor3f(0.2, 0.2, 1.0); // BLUE!
   // glColor3f(1.0, 0.2, 0.2); //RED!
@@ -149,7 +148,13 @@ int main() {
       renderer, SDL_PIXELFORMAT_RGB565, SDL_TEXTUREACCESS_STREAMING, 480, 480);
 
   // Initialize TinyGL
-  ZBuffer *zbuffer = ZB_open(480, 480, ZB_MODE_RGBA, NULL);
+  ZBuffer *zbuffer = ZB_open(480, 480, ZB_MODE_5R6G5B, NULL);
+
+  if (!zbuffer) {
+    SDL_Log("Failed to create zbuffer");
+    return 3;
+  }
+
   glInit(zbuffer);
 
   // QuickJS
@@ -213,6 +218,7 @@ int main() {
     // Copy the TinyGL framebuffer to the SDL texture
     void *pixels;
     int pitch;
+
     SDL_LockTexture(albedoTexture, NULL, &pixels, &pitch);
     memcpy(pixels, zbuffer->pbuf, 480 * 480 * 2);
     SDL_UnlockTexture(albedoTexture);
