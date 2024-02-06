@@ -32,6 +32,21 @@ int doPostProcess = 0;
 #define M_PI 3.14159265
 #endif
 
+cv::Mat resizeAndCropToSquare(cv::Mat img, int outputSize) {
+    // Step 1: Resize image maintaining aspect ratio
+    double scale = outputSize / static_cast<double>(std::min(img.cols, img.rows));
+    cv::Mat resized;
+    cv::resize(img, resized, cv::Size(), scale, scale, cv::INTER_LINEAR);
+
+    // Step 2: Crop the center of the image
+    int cropStartX = (resized.cols - outputSize) / 2;
+    int cropStartY = (resized.rows - outputSize) / 2;
+    cv::Rect roi(cropStartX, cropStartY, outputSize, outputSize); // Define a rectangle for cropping
+    cv::Mat cropped = resized(roi); // Crop the image
+
+    return cropped;
+}
+
 GLuint tex = 0;
 GLuint tex2 = 0;
 GLuint do1D = 0;

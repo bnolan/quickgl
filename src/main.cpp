@@ -1,6 +1,7 @@
 #include <SDL.h>
 #include <SDL_ttf.h>
 #include <iostream>
+#include <opencv2/opencv.hpp>
 
 extern "C" {
 
@@ -16,271 +17,8 @@ extern "C" {
 int winSizeX = 480;
 int winSizeY = 480;
 
-void drawTriangle(JSContext *ctx) {
-  std::string jsCode = R"XX(
-    timePassed += 1.0 / 60;
-
-    TinyGL.glMatrixMode(TinyGL.MODELVIEW);
-    TinyGL.glLoadIdentity();
-    TinyGL.glPushMatrix();
-    TinyGL.glRotatef(timePassed * 90, 0, 0, 1);
-
-    TinyGL.glBegin(TinyGL.TRIANGLES);
-
-    TinyGL.glColor3f(0.2, 0.2, 0.5);
-    TinyGL.glVertex3f(-0.8, -0.8, 0.2);
-
-    TinyGL.glColor3f(0.5, Math.abs(Math.sin(timePassed)), 0.5);
-    TinyGL.glVertex3f(0.8, -0.8, 0.2);
-
-    TinyGL.glColor3f(0.9, 0.6, 0.6);
-    TinyGL.glVertex3f(0, 0.8, 0.2);
-
-    TinyGL.glEnd();
-    TinyGL.glPopMatrix();
-)XX";
-
-  // Evaluate the JavaScript code
-  JSValue result = JS_Eval(ctx, jsCode.c_str(), jsCode.length(), "<input>",
-                           JS_EVAL_TYPE_GLOBAL);
-
-  JS_FreeValue(ctx, result);
-}
-
-void draw(JSContext *ctx) {
-  // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  // glEnable(GL_TEXTURE_2D);
-  // glBindTexture(GL_TEXTURE_2D,tex);
-  // time_passed += 0.0166666;
-
-  drawTriangle(ctx);
-
-  // glColor3f(0.2, 0.2, 0.2);
-  // glVertex3f(-0.8, -0.8, 0.2);
-
-  // glColor3f(0.5, 0.5, 0.5);
-  // glVertex3f(0.8, -0.8, 0.2);
-
-  // glColor3f(0.9, 0.9, 0.9);
-  // glVertex3f(0, 1.2, 0.2);
-}
-
-void initScene() {
-
-  // glLightfv( GL_LIGHT0, GL_AMBIENT, white);
-  // glLightfv( GL_LIGHT0, GL_SPECULAR, white);
-  // glEnable( GL_CULL_FACE );
-  glDisable(GL_CULL_FACE);
-  glEnable(GL_LIGHTING);
-  glDisable(GL_TEXTURE_2D);
-  glDisable(GL_LIGHTING);
-  // glEnable( GL_LIGHT0 );
-  glEnable(GL_DEPTH_TEST);
-  glShadeModel(GL_SMOOTH);
-  glTextSize(GL_TEXT_SIZE24x24);
-  /*
-  {
-          int sw = 0, sh = 0, sc = 0; //sc goes unused.
-          uchar* source_data = stbi_load("texture.png", &sw, &sh, &sc, 3);
-          if(source_data){
-                  tex = loadRGBTexture(source_data, sw, sh);
-                  free(source_data);
-          } else {
-                  printf("\nCan't load texture!\n");
-          }
-  }*/
-  glEnable(GL_NORMALIZE);
-}
-
-// Wrapper for glColor3f
-static JSValue js_glColor3f(JSContext *ctx, JSValueConst this_val, int argc,
-                            JSValueConst *argv) {
-  double r, g, b;
-
-  // Extract the arguments from JavaScript
-  JS_ToFloat64(ctx, &r, argv[0]);
-  JS_ToFloat64(ctx, &g, argv[1]);
-  JS_ToFloat64(ctx, &b, argv[2]);
-
-  // Call the actual TinyGL function
-  glColor3f((float)r, (float)g, (float)b);
-
-  return JS_UNDEFINED;
-}
-
-// Wrapper for glVertex3f
-static JSValue js_glVertex3f(JSContext *ctx, JSValueConst this_val, int argc,
-                             JSValueConst *argv) {
-  double x, y, z;
-
-  // Extract the arguments from JavaScript
-  JS_ToFloat64(ctx, &x, argv[0]);
-  JS_ToFloat64(ctx, &y, argv[1]);
-  JS_ToFloat64(ctx, &z, argv[2]);
-
-  // Call the actual TinyGL function
-  glVertex3f((float)x, (float)y, (float)z);
-
-  return JS_UNDEFINED;
-}
-
-// Wrapper for glMatrixMode
-static JSValue js_glMatrixMode(JSContext *ctx, JSValueConst this_val, int argc,
-                               JSValueConst *argv) {
-  int mode;
-  JS_ToInt32(ctx, &mode, argv[0]);
-  glMatrixMode(mode);
-  return JS_UNDEFINED;
-}
-
-// Wrapper for glLoadIdentity
-static JSValue js_glLoadIdentity(JSContext *ctx, JSValueConst this_val,
-                                 int argc, JSValueConst *argv) {
-  glLoadIdentity();
-  return JS_UNDEFINED;
-}
-
-// Wrapper for glPushMatrix
-static JSValue js_glPushMatrix(JSContext *ctx, JSValueConst this_val, int argc,
-                               JSValueConst *argv) {
-  glPushMatrix();
-  return JS_UNDEFINED;
-}
-
-// Wrapper for glRotatef
-static JSValue js_glRotatef(JSContext *ctx, JSValueConst this_val, int argc,
-                            JSValueConst *argv) {
-  double angle, x, y, z;
-  JS_ToFloat64(ctx, &angle, argv[0]);
-  JS_ToFloat64(ctx, &x, argv[1]);
-  JS_ToFloat64(ctx, &y, argv[2]);
-  JS_ToFloat64(ctx, &z, argv[3]);
-  glRotatef((float)angle, (float)x, (float)y, (float)z);
-  return JS_UNDEFINED;
-}
-
-// Wrapper for glBegin
-static JSValue js_glBegin(JSContext *ctx, JSValueConst this_val, int argc,
-                          JSValueConst *argv) {
-  int mode;
-  JS_ToInt32(ctx, &mode, argv[0]);
-  glBegin(mode);
-  return JS_UNDEFINED;
-}
-
-// Wrapper for glEnd
-static JSValue js_glEnd(JSContext *ctx, JSValueConst this_val, int argc,
-                        JSValueConst *argv) {
-  glEnd();
-  return JS_UNDEFINED;
-}
-
-// Wrapper for glPopMatrix
-static JSValue js_glPopMatrix(JSContext *ctx, JSValueConst this_val, int argc,
-                              JSValueConst *argv) {
-  glPopMatrix();
-  return JS_UNDEFINED;
-}
-
-void js_tinygl_init(JSContext *ctx, JSValue ns) {
-  // Register each function manually
-  JS_SetPropertyStr(ctx, ns, "glColor3f",
-                    JS_NewCFunction(ctx, js_glColor3f, "glColor3f", 3));
-  JS_SetPropertyStr(ctx, ns, "glVertex3f",
-                    JS_NewCFunction(ctx, js_glVertex3f, "glVertex3f", 3));
-  JS_SetPropertyStr(ctx, ns, "glMatrixMode",
-                    JS_NewCFunction(ctx, js_glMatrixMode, "glMatrixMode", 1));
-  JS_SetPropertyStr(
-      ctx, ns, "glLoadIdentity",
-      JS_NewCFunction(ctx, js_glLoadIdentity, "glLoadIdentity", 0));
-
-  JS_SetPropertyStr(ctx, ns, "glPushMatrix",
-                    JS_NewCFunction(ctx, js_glPushMatrix, "glPushMatrix", 0));
-  JS_SetPropertyStr(ctx, ns, "glRotatef",
-                    JS_NewCFunction(ctx, js_glRotatef, "glRotatef", 4));
-  JS_SetPropertyStr(ctx, ns, "glBegin",
-                    JS_NewCFunction(ctx, js_glBegin, "glBegin", 1));
-  JS_SetPropertyStr(ctx, ns, "glEnd",
-                    JS_NewCFunction(ctx, js_glEnd, "glEnd", 0));
-  JS_SetPropertyStr(ctx, ns, "glPopMatrix",
-                    JS_NewCFunction(ctx, js_glPopMatrix, "glPopMatrix", 0));
-}
-
-std::string getCounterText(JSContext *ctx, int frameCount) {
-  std::string jsCode = "getCounterText(" + std::to_string(frameCount) + ");";
-
-  // Evaluate the JavaScript code
-  JSValue result = JS_Eval(ctx, jsCode.c_str(), jsCode.length(), "<input>",
-                           JS_EVAL_TYPE_GLOBAL);
-
-  // Convert the result to a C string
-  const char *resultStr = JS_ToCString(ctx, result);
-  if (!resultStr) {
-    JS_FreeValue(ctx, result);
-    return "JS Error";
-  }
-
-  // Convert the result to a std::string and free the JS string
-  std::string counterText(resultStr);
-  JS_FreeCString(ctx, resultStr);
-  JS_FreeValue(ctx, result);
-
-  return counterText;
-}
-
-int main() {
-  std::cout << "Hello, CMake World!" << std::endl;
-
-  if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-    SDL_Log("Unable to initialize SDL: %s", SDL_GetError());
-    return 1;
-  }
-
-  if (TTF_Init() == -1) {
-    SDL_Log("TTF_Init: %s\n", TTF_GetError());
-    return 2;
-  }
-
-  SDL_Window *window = SDL_CreateWindow("QuickGL", SDL_WINDOWPOS_CENTERED,
-                                        SDL_WINDOWPOS_CENTERED, 480, 480, 0);
-
-  if (!window) {
-    SDL_Log("Failed to create window: %s", SDL_GetError());
-    return 3;
-  }
-
-  SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, 0);
-  if (!renderer) {
-    SDL_Log("Failed to create renderer: %s", SDL_GetError());
-    SDL_DestroyWindow(window);
-    return 4;
-  }
-
-  SDL_Texture *albedoTexture = SDL_CreateTexture(
-      renderer, SDL_PIXELFORMAT_RGB565, SDL_TEXTUREACCESS_STREAMING, 480, 480);
-
-  // Initialize TinyGL
-  ZBuffer *zbuffer = ZB_open(480, 480, ZB_MODE_5R6G5B, NULL);
-
-  if (!zbuffer) {
-    SDL_Log("Failed to create zbuffer");
-    return 3;
-  }
-
-  glInit(zbuffer);
-
-  // QuickJS
-
-  // Initialize the QuickJS runtime and context
-  JSRuntime *rt = JS_NewRuntime();
-  JSContext *ctx = JS_NewContext(rt);
-
-  JSValue tinyglNamespace = JS_NewObject(ctx);
-  js_tinygl_init(ctx, tinyglNamespace);
-  JS_SetPropertyStr(ctx, JS_GetGlobalObject(ctx), "TinyGL", tinyglNamespace);
-
-  // Define the JavaScript code that generates the counter text
-  std::string jsCode = R"XX(
+// Define the JavaScript code that generates the counter text
+std::string templateCode = R"XX(
 
     var timePassed = 0.0;
 
@@ -1028,9 +766,298 @@ Object.assign(TinyGL, {
 
 )XX";
 
+void drawTriangle(JSContext *ctx) {
+  std::string jsCode = R"XX(
+    timePassed += 1.0 / 60;
+
+    TinyGL.glMatrixMode(TinyGL.MODELVIEW);
+    TinyGL.glLoadIdentity();
+    TinyGL.glPushMatrix();
+    TinyGL.glRotatef(timePassed * 90, 0, 0, 1);
+
+    TinyGL.glBegin(TinyGL.TRIANGLES);
+
+    TinyGL.glColor3f(0.2, 0.2, 0.2);
+    TinyGL.glVertex3f(-0.8, -0.8, 0.2);
+
+    TinyGL.glColor3f(0.5, 0.5, 0.5);
+    TinyGL.glVertex3f(0.8, -0.8, 0.2);
+
+    TinyGL.glColor3f(0.6, 0.6, 0.6);
+    TinyGL.glVertex3f(0, 0.8, 0.2);
+
+    TinyGL.glEnd();
+    TinyGL.glPopMatrix();
+)XX";
+
   // Evaluate the JavaScript code
   JSValue result = JS_Eval(ctx, jsCode.c_str(), jsCode.length(), "<input>",
                            JS_EVAL_TYPE_GLOBAL);
+
+  JS_FreeValue(ctx, result);
+}
+
+void draw(JSContext *ctx) {
+  // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  // glEnable(GL_TEXTURE_2D);
+  // glBindTexture(GL_TEXTURE_2D,tex);
+  // time_passed += 0.0166666;
+
+  drawTriangle(ctx);
+
+  // glColor3f(0.2, 0.2, 0.2);
+  // glVertex3f(-0.8, -0.8, 0.2);
+
+  // glColor3f(0.5, 0.5, 0.5);
+  // glVertex3f(0.8, -0.8, 0.2);
+
+  // glColor3f(0.9, 0.9, 0.9);
+  // glVertex3f(0, 1.2, 0.2);
+}
+
+void initScene() {
+
+  // glLightfv( GL_LIGHT0, GL_AMBIENT, white);
+  // glLightfv( GL_LIGHT0, GL_SPECULAR, white);
+  // glEnable( GL_CULL_FACE );
+  glDisable(GL_CULL_FACE);
+  glEnable(GL_LIGHTING);
+  glEnable(GL_TEXTURE_2D);
+  glDisable(GL_LIGHTING);
+  // glEnable( GL_LIGHT0 );
+  glEnable(GL_DEPTH_TEST);
+  glShadeModel(GL_SMOOTH);
+  glTextSize(GL_TEXT_SIZE24x24);
+  /*
+  {
+          int sw = 0, sh = 0, sc = 0; //sc goes unused.
+          uchar* source_data = stbi_load("texture.png", &sw, &sh, &sc, 3);
+          if(source_data){
+                  tex = loadRGBTexture(source_data, sw, sh);
+                  free(source_data);
+          } else {
+                  printf("\nCan't load texture!\n");
+          }
+  }*/
+  glEnable(GL_NORMALIZE);
+}
+
+// Wrapper for glColor3f
+static JSValue js_glColor3f(JSContext *ctx, JSValueConst this_val, int argc,
+                            JSValueConst *argv) {
+  double r, g, b;
+
+  // Extract the arguments from JavaScript
+  JS_ToFloat64(ctx, &r, argv[0]);
+  JS_ToFloat64(ctx, &g, argv[1]);
+  JS_ToFloat64(ctx, &b, argv[2]);
+
+  // Call the actual TinyGL function
+  glColor3f((float)r, (float)g, (float)b);
+
+  return JS_UNDEFINED;
+}
+
+// Wrapper for glVertex3f
+static JSValue js_glVertex3f(JSContext *ctx, JSValueConst this_val, int argc,
+                             JSValueConst *argv) {
+  double x, y, z;
+
+  // Extract the arguments from JavaScript
+  JS_ToFloat64(ctx, &x, argv[0]);
+  JS_ToFloat64(ctx, &y, argv[1]);
+  JS_ToFloat64(ctx, &z, argv[2]);
+
+  // Call the actual TinyGL function
+  glVertex3f((float)x, (float)y, (float)z);
+
+  return JS_UNDEFINED;
+}
+
+// Wrapper for glMatrixMode
+static JSValue js_glMatrixMode(JSContext *ctx, JSValueConst this_val, int argc,
+                               JSValueConst *argv) {
+  int mode;
+  JS_ToInt32(ctx, &mode, argv[0]);
+  glMatrixMode(mode);
+  return JS_UNDEFINED;
+}
+
+// Wrapper for glLoadIdentity
+static JSValue js_glLoadIdentity(JSContext *ctx, JSValueConst this_val,
+                                 int argc, JSValueConst *argv) {
+  glLoadIdentity();
+  return JS_UNDEFINED;
+}
+
+// Wrapper for glPushMatrix
+static JSValue js_glPushMatrix(JSContext *ctx, JSValueConst this_val, int argc,
+                               JSValueConst *argv) {
+  glPushMatrix();
+  return JS_UNDEFINED;
+}
+
+// Wrapper for glRotatef
+static JSValue js_glRotatef(JSContext *ctx, JSValueConst this_val, int argc,
+                            JSValueConst *argv) {
+  double angle, x, y, z;
+  JS_ToFloat64(ctx, &angle, argv[0]);
+  JS_ToFloat64(ctx, &x, argv[1]);
+  JS_ToFloat64(ctx, &y, argv[2]);
+  JS_ToFloat64(ctx, &z, argv[3]);
+  glRotatef((float)angle, (float)x, (float)y, (float)z);
+  return JS_UNDEFINED;
+}
+
+// Wrapper for glBegin
+static JSValue js_glBegin(JSContext *ctx, JSValueConst this_val, int argc,
+                          JSValueConst *argv) {
+  int mode;
+  JS_ToInt32(ctx, &mode, argv[0]);
+  glBegin(mode);
+  return JS_UNDEFINED;
+}
+
+// Wrapper for glEnd
+static JSValue js_glEnd(JSContext *ctx, JSValueConst this_val, int argc,
+                        JSValueConst *argv) {
+  glEnd();
+  return JS_UNDEFINED;
+}
+
+// Wrapper for glPopMatrix
+static JSValue js_glPopMatrix(JSContext *ctx, JSValueConst this_val, int argc,
+                              JSValueConst *argv) {
+  glPopMatrix();
+  return JS_UNDEFINED;
+}
+
+void js_tinygl_init(JSContext *ctx, JSValue ns) {
+  // Register each function manually
+  JS_SetPropertyStr(ctx, ns, "glColor3f",
+                    JS_NewCFunction(ctx, js_glColor3f, "glColor3f", 3));
+  JS_SetPropertyStr(ctx, ns, "glVertex3f",
+                    JS_NewCFunction(ctx, js_glVertex3f, "glVertex3f", 3));
+  JS_SetPropertyStr(ctx, ns, "glMatrixMode",
+                    JS_NewCFunction(ctx, js_glMatrixMode, "glMatrixMode", 1));
+  JS_SetPropertyStr(
+      ctx, ns, "glLoadIdentity",
+      JS_NewCFunction(ctx, js_glLoadIdentity, "glLoadIdentity", 0));
+
+  JS_SetPropertyStr(ctx, ns, "glPushMatrix",
+                    JS_NewCFunction(ctx, js_glPushMatrix, "glPushMatrix", 0));
+  JS_SetPropertyStr(ctx, ns, "glRotatef",
+                    JS_NewCFunction(ctx, js_glRotatef, "glRotatef", 4));
+  JS_SetPropertyStr(ctx, ns, "glBegin",
+                    JS_NewCFunction(ctx, js_glBegin, "glBegin", 1));
+  JS_SetPropertyStr(ctx, ns, "glEnd",
+                    JS_NewCFunction(ctx, js_glEnd, "glEnd", 0));
+  JS_SetPropertyStr(ctx, ns, "glPopMatrix",
+                    JS_NewCFunction(ctx, js_glPopMatrix, "glPopMatrix", 0));
+}
+
+std::string getCounterText(JSContext *ctx, int frameCount) {
+  std::string jsCode = "getCounterText(" + std::to_string(frameCount) + ");";
+
+  // Evaluate the JavaScript code
+  JSValue result = JS_Eval(ctx, jsCode.c_str(), jsCode.length(), "<input>",
+                           JS_EVAL_TYPE_GLOBAL);
+
+  // Convert the result to a C string
+  const char *resultStr = JS_ToCString(ctx, result);
+  if (!resultStr) {
+    JS_FreeValue(ctx, result);
+    return "JS Error";
+  }
+
+  // Convert the result to a std::string and free the JS string
+  std::string counterText(resultStr);
+  JS_FreeCString(ctx, resultStr);
+  JS_FreeValue(ctx, result);
+
+  return counterText;
+}
+
+cv::Mat resizeAndCropToSquare(cv::Mat img, int outputSize) {
+  // Step 1: Resize image maintaining aspect ratio
+  double scale = outputSize / static_cast<double>(std::min(img.cols, img.rows));
+  cv::Mat resized;
+  cv::resize(img, resized, cv::Size(), scale, scale, cv::INTER_LINEAR);
+
+  // Step 2: Crop the center of the image
+  int cropStartX = (resized.cols - outputSize) / 2;
+  int cropStartY = (resized.rows - outputSize) / 2;
+  cv::Rect roi(cropStartX, cropStartY, outputSize,
+               outputSize);       // Define a rectangle for cropping
+  cv::Mat cropped = resized(roi); // Crop the image
+
+  return cropped;
+}
+
+int main() {
+  std::cout << "Hello, CMake World!" << std::endl;
+
+  if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+    SDL_Log("Unable to initialize SDL: %s", SDL_GetError());
+    return 1;
+  }
+
+  if (TTF_Init() == -1) {
+    SDL_Log("TTF_Init: %s\n", TTF_GetError());
+    return 2;
+  }
+
+  // Initialize OpenCV capture
+  cv::VideoCapture cap(1); // Open the default camera
+  if (!cap.isOpened()) {
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't open camera");
+    return 1;
+  }
+
+  cv::Mat frame;
+  SDL_Texture *cameraTexture = nullptr;
+
+  SDL_Window *window = SDL_CreateWindow("QuickGL", SDL_WINDOWPOS_CENTERED,
+                                        SDL_WINDOWPOS_CENTERED, 480, 480, 0);
+
+  if (!window) {
+    SDL_Log("Failed to create window: %s", SDL_GetError());
+    return 3;
+  }
+
+  SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, 0);
+  if (!renderer) {
+    SDL_Log("Failed to create renderer: %s", SDL_GetError());
+    SDL_DestroyWindow(window);
+    return 4;
+  }
+
+  SDL_Texture *albedoTexture = SDL_CreateTexture(
+      renderer, SDL_PIXELFORMAT_RGB565, SDL_TEXTUREACCESS_STREAMING, 480, 480);
+
+  // Initialize TinyGL
+  ZBuffer *zbuffer = ZB_open(480, 480, ZB_MODE_5R6G5B, NULL);
+
+  if (!zbuffer) {
+    SDL_Log("Failed to create zbuffer");
+    return 3;
+  }
+
+  glInit(zbuffer);
+
+  // QuickJS
+
+  // Initialize the QuickJS runtime and context
+  JSRuntime *rt = JS_NewRuntime();
+  JSContext *ctx = JS_NewContext(rt);
+
+  JSValue tinyglNamespace = JS_NewObject(ctx);
+  js_tinygl_init(ctx, tinyglNamespace);
+  JS_SetPropertyStr(ctx, JS_GetGlobalObject(ctx), "TinyGL", tinyglNamespace);
+
+  // Evaluate the JavaScript code
+  JSValue result = JS_Eval(ctx, templateCode.c_str(), templateCode.length(),
+                           "<input>", JS_EVAL_TYPE_GLOBAL);
   JS_FreeValue(ctx, result);
 
   // Render...
@@ -1056,13 +1083,75 @@ Object.assign(TinyGL, {
   int frameCount = 0;
 
   while (running) {
+    cap >> frame; // Capture a frame
+
+    // Convert frame to SDL texture
+    cv::Mat frameRGB;
+    // cv::cvtColor(frame, frameRGB, cv::COLOR_BGR2RGB);
+
+    // For color images, apply equalization to the Y channel in YCrCb color
+    // space
+    cv::Mat imgYCrCb;
+    cv::cvtColor(frame, imgYCrCb, cv::COLOR_BGR2YCrCb);
+
+    std::vector<cv::Mat> channels;
+    cv::split(imgYCrCb, channels);
+    cv::equalizeHist(channels[0], channels[0]);
+    cv::merge(channels, imgYCrCb);
+    cv::cvtColor(imgYCrCb, frameRGB, cv::COLOR_YCrCb2RGB);
+
+    // if (!cameraTexture) {
+    //   cameraTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGB24,
+    //                                     SDL_TEXTUREACCESS_STREAMING,
+    //                                     frame.cols, frame.rows);
+    // }
+    // SDL_UpdateTexture(cameraTexture, NULL, frameRGB.data, frameRGB.step);
+
     // Off black
     // SDL_SetRenderDrawColor(renderer, 32, 32, 32, 255);
     // SDL_RenderClear(renderer);
 
     // TinyGL rendering commands
-    glClearColor(0.2, 0.2, 0.2, 1.0);
-    glClear(GL_COLOR_BUFFER_BIT);
+    // glClearColor(0.0, 0.0, 0.0, 1.0);
+    // glClear(GL_COLOR_BUFFER_BIT);
+
+    cv::Mat crop = resizeAndCropToSquare(frameRGB, 480);
+    cv::Mat temp;
+    crop.convertTo(temp, CV_8U);
+
+    // glGenTextures(1, &textureID);
+    // glBindTexture(GL_TEXTURE_2D, textureID);
+    // glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 480, 480, 0, GL_RGB,
+    //              GL_UNSIGNED_SHORT, temp.data);
+
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
+    GLuint t = 0;
+    glGenTextures(1, &t);
+    glBindTexture(GL_TEXTURE_2D, t);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, 480, 480, 0, GL_RGB, GL_UNSIGNED_BYTE,
+                 (unsigned char *)temp.data);
+
+    glBegin(GL_QUADS);
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, t);
+    glTexCoord2f(0.0f, 1.0f);
+    glVertex2f(-1, -1); // Bottom Left
+    glTexCoord2f(1.0f, 1.0f);
+    glVertex2f(1, -1); // Bottom Right
+    glTexCoord2f(1.0f, 0.0f);
+    glVertex2f(1, 1); // Top Right
+    glTexCoord2f(0.0f, 0.0f);
+    glVertex2f(-1, 1); // Top Left
+    glEnd();
 
     draw(ctx);
 
@@ -1074,7 +1163,12 @@ Object.assign(TinyGL, {
     memcpy(pixels, zbuffer->pbuf, 480 * 480 * 2);
     SDL_UnlockTexture(albedoTexture);
 
-    // Render the SDL texture
+    // Clear screen and render the texture
+    // SDL_RenderClear(renderer);
+    // SDL_RenderCopy(renderer, cameraTexture, NULL, NULL);
+
+    // Blend the SDL texture
+    // SDL_SetTextureBlendMode(albedoTexture, SDL_BLENDMODE_ADD);
     SDL_RenderCopy(renderer, albedoTexture, NULL, NULL);
 
     // Set text to render
