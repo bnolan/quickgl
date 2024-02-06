@@ -27,15 +27,13 @@ void draw() {
   glPushMatrix();
   glRotatef(time_passed * 90, 0, 0, 1);
   glBegin(GL_TRIANGLES);
-  glColor3f(0.2, 0.2, 1.0); // BLUE!
-  // glColor3f(1.0, 0.2, 0.2); //RED!
+  glColor3f(0.2, 0.2, 0.2);
   glVertex3f(-0.8, -0.8, 0.2);
 
-  glColor3f(0.2, 1.0, 0.2); // GREEN!
-  // glColor3f(1.0, 0.2, 0.2); //RED!
+  glColor3f(0.5, 0.5, 0.5);
   glVertex3f(0.8, -0.8, 0.2);
 
-  glColor3f(1.0, 0.2, 0.2); // RED!
+  glColor3f(0.9, 0.9, 0.9);
   glVertex3f(0, 1.2, 0.2);
   glEnd();
   glPopMatrix();
@@ -206,11 +204,11 @@ int main() {
 
   while (running) {
     // Off black
-    SDL_SetRenderDrawColor(renderer, 32, 32, 32, 255);
-    SDL_RenderClear(renderer);
+    // SDL_SetRenderDrawColor(renderer, 32, 32, 32, 255);
+    // SDL_RenderClear(renderer);
 
     // TinyGL rendering commands
-    glClearColor(0.1, 0.2, 0.3, 1.0);
+    glClearColor(0.2, 0.2, 0.2, 1.0);
     glClear(GL_COLOR_BUFFER_BIT);
 
     draw();
