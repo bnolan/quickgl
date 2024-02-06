@@ -8,7 +8,33 @@ extern "C" {
 
 std::string getCounterText(JSContext* ctx, int frameCount) {
     // Define the JavaScript code that generates the counter text
-    std::string jsCode = "function getCounterText(count) { return 'Count: ' + count; }; getCounterText(" + std::to_string(frameCount) + ");";
+    std::string jsCode = R"XX(
+
+      function triangleWave(x, period, min, max) {
+        const amplitude = max - min;
+        const phase = x % period;
+        const ascending = 2 * phase / period;
+        if (ascending < 1) {
+          return min + amplitude * ascending;
+        } else {
+          return max - amplitude * (ascending - 1);
+        }
+      }
+
+      function sineWave(x, period, min, max) {
+        return (Math.sin(x / period * 3.14) + 1) * 0.5 * (max-min) + min * 2
+      }
+
+      function getCounterText(count) { 
+        var width = 20
+        var position = sineWave(count, 30, 0, width)
+        return "lol: " + ('-'.repeat(position) + '#' + '-'.repeat(width - position))
+      }; 
+
+)XX";
+      
+
+    jsCode += "getCounterText(" + std::to_string(frameCount) + ");";
 
     // Evaluate the JavaScript code
     JSValue result = JS_Eval(ctx, jsCode.c_str(), jsCode.length(), "<input>", JS_EVAL_TYPE_GLOBAL);
@@ -41,7 +67,7 @@ int main() {
       return 2;
   }
 
-  SDL_Window* window = SDL_CreateWindow("QuickJS Text Rendering",
+  SDL_Window* window = SDL_CreateWindow("QuickGL",
                                         SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
                                         480, 480, 0);
   if (!window) {
