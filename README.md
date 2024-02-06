@@ -1,8 +1,9 @@
 # QuickGL
 
-A javascript runtime with tinygl bindings.
+A javascript runtime with (incomplete) tinygl and opencv bindings for experimenting with mixed reality.
 
-<img width="545" alt="Screenshot 2024-02-06 at 6 22 25 PM" src="https://github.com/bnolan/quickgl/assets/17499/8a81fd01-36b1-464d-91cc-0c83e56ed4a9">
+<img width="566" alt="Screenshot 2024-02-06 at 9 08 04 PM" src="https://github.com/bnolan/quickgl/assets/17499/2b099ffe-1d4a-4ce5-a8e1-fd51f8430596">
+
 
 ## Configuring on MacOS
 
