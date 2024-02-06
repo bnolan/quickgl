@@ -1,6 +1,7 @@
 #include <SDL.h>
 #include <SDL_ttf.h>
 #include <iostream>
+#include <opencv2/opencv.hpp>
 
 extern "C" {
 
@@ -27,13 +28,13 @@ void drawTriangle(JSContext *ctx) {
 
     TinyGL.glBegin(TinyGL.TRIANGLES);
 
-    TinyGL.glColor3f(0.2, 0.2, 0.5);
+    TinyGL.glColor3f(0.2, 0.2, 0.2);
     TinyGL.glVertex3f(-0.8, -0.8, 0.2);
 
-    TinyGL.glColor3f(0.5, Math.abs(Math.sin(timePassed)), 0.5);
+    TinyGL.glColor3f(0.5, 0.5, 0.5);
     TinyGL.glVertex3f(0.8, -0.8, 0.2);
 
-    TinyGL.glColor3f(0.9, 0.6, 0.6);
+    TinyGL.glColor3f(0.6, 0.6, 0.6);
     TinyGL.glVertex3f(0, 0.8, 0.2);
 
     TinyGL.glEnd();
@@ -240,6 +241,16 @@ int main() {
     SDL_Log("TTF_Init: %s\n", TTF_GetError());
     return 2;
   }
+
+  // Initialize OpenCV capture
+  cv::VideoCapture cap(1); // Open the default camera
+  if (!cap.isOpened()) {
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't open camera");
+    return 1;
+  }
+
+  cv::Mat frame;
+  SDL_Texture *cameraTexture = nullptr;
 
   SDL_Window *window = SDL_CreateWindow("QuickGL", SDL_WINDOWPOS_CENTERED,
                                         SDL_WINDOWPOS_CENTERED, 480, 480, 0);
@@ -1056,6 +1067,19 @@ Object.assign(TinyGL, {
   int frameCount = 0;
 
   while (running) {
+    cap >> frame; // Capture a frame
+
+    // Convert frame to SDL texture
+    cv::Mat frameRGB;
+    cv::cvtColor(frame, frameRGB, cv::COLOR_BGR2RGB);
+
+    if (!cameraTexture) {
+      cameraTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGB24,
+                                        SDL_TEXTUREACCESS_STREAMING, frame.cols,
+                                        frame.rows);
+    }
+    SDL_UpdateTexture(cameraTexture, NULL, frameRGB.data, frameRGB.step);
+
     // Off black
     // SDL_SetRenderDrawColor(renderer, 32, 32, 32, 255);
     // SDL_RenderClear(renderer);
@@ -1074,7 +1098,12 @@ Object.assign(TinyGL, {
     memcpy(pixels, zbuffer->pbuf, 480 * 480 * 2);
     SDL_UnlockTexture(albedoTexture);
 
+    // Clear screen and render the texture
+    SDL_RenderClear(renderer);
+    SDL_RenderCopy(renderer, cameraTexture, NULL, NULL);
+
     // Render the SDL texture
+    SDL_SetTextureBlendMode(albedoTexture, SDL_BLENDMODE_ADD);
     SDL_RenderCopy(renderer, albedoTexture, NULL, NULL);
 
     // Set text to render
