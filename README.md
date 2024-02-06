@@ -4,6 +4,11 @@ A javascript runtime with (incomplete) tinygl and opencv bindings for experiment
 
 <img width="533" alt="Screenshot 2024-02-06 at 10 16 26 PM" src="https://github.com/bnolan/quickgl/assets/17499/ae021156-da43-423e-a61c-1949bd63d72f">
 
+## Limitations
+
+- RGB565
+- 480x480
+
 ## Configuring on MacOS
 
     brew install sdl2
@@ -24,5 +29,8 @@ A javascript runtime with (incomplete) tinygl and opencv bindings for experiment
 1. Run clang-format
 2. Keep it simple
 3. Don't use exceptions
-4. Don't crash
-5. Don't leak
+
+And best efforts:
+
+1. Don't crash
+2. Don't leak
