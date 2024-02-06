@@ -17,7 +17,28 @@ double time_passed = 0.0;
 int winSizeX = 480;
 int winSizeY = 480;
 
-void draw() {
+void drawTriangle(JSContext *ctx) {
+  std::string jsCode = R"XX(
+
+      TinyGL.glColor3f(0.2, 0.2, 0.5);
+      TinyGL.glVertex3f(-0.8, -0.8, 0.2);
+
+      TinyGL.glColor3f(0.5, 0.9, 0.5);
+      TinyGL.glVertex3f(0.8, -0.8, 0.2);
+
+      TinyGL.glColor3f(0.9, 0.6, 0.6);
+      TinyGL.glVertex3f(0, 0.8, 0.2);
+
+)XX";
+
+  // Evaluate the JavaScript code
+  JSValue result = JS_Eval(ctx, jsCode.c_str(), jsCode.length(), "<input>",
+                           JS_EVAL_TYPE_GLOBAL);
+
+  // JS_FreeValue(ctx, result);
+}
+
+void draw(JSContext *ctx) {
   // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   // glEnable(GL_TEXTURE_2D);
   // glBindTexture(GL_TEXTURE_2D,tex);
@@ -27,14 +48,17 @@ void draw() {
   glPushMatrix();
   glRotatef(time_passed * 90, 0, 0, 1);
   glBegin(GL_TRIANGLES);
-  glColor3f(0.2, 0.2, 0.2);
-  glVertex3f(-0.8, -0.8, 0.2);
 
-  glColor3f(0.5, 0.5, 0.5);
-  glVertex3f(0.8, -0.8, 0.2);
+  drawTriangle(ctx);
 
-  glColor3f(0.9, 0.9, 0.9);
-  glVertex3f(0, 1.2, 0.2);
+  // glColor3f(0.2, 0.2, 0.2);
+  // glVertex3f(-0.8, -0.8, 0.2);
+
+  // glColor3f(0.5, 0.5, 0.5);
+  // glVertex3f(0.8, -0.8, 0.2);
+
+  // glColor3f(0.9, 0.9, 0.9);
+  // glVertex3f(0, 1.2, 0.2);
   glEnd();
   glPopMatrix();
 }
@@ -180,16 +204,8 @@ int main() {
   js_tinygl_init(ctx, tinyglNamespace);
   JS_SetPropertyStr(ctx, JS_GetGlobalObject(ctx), "TinyGL", tinyglNamespace);
 
-  // If adding to the global namespace:
-  js_tinygl_init(ctx, JS_GetGlobalObject(ctx));
-
   // Define the JavaScript code that generates the counter text
   std::string jsCode = R"XX(
-
-    function triangle () {
-      TinyGL.glColor3f(1.0, 0.0, 0.0); // Set color to red
-      TinyGL.glVertex3f(0.0, 0.0, 0.0); // Specify a vertex
-    }
 
     function triangleWave(x, period, min, max) {
       const amplitude = max - min;
@@ -217,6 +233,7 @@ int main() {
   // Evaluate the JavaScript code
   JSValue result = JS_Eval(ctx, jsCode.c_str(), jsCode.length(), "<input>",
                            JS_EVAL_TYPE_GLOBAL);
+  JS_FreeValue(ctx, result);
 
   // Render...
 
@@ -249,7 +266,7 @@ int main() {
     glClearColor(0.2, 0.2, 0.2, 1.0);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    draw();
+    draw(ctx);
 
     // Copy the TinyGL framebuffer to the SDL texture
     void *pixels;
