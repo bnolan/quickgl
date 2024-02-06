@@ -773,18 +773,23 @@ void drawTriangle(JSContext *ctx) {
     TinyGL.glMatrixMode(TinyGL.MODELVIEW);
     TinyGL.glLoadIdentity();
     TinyGL.glPushMatrix();
-    TinyGL.glRotatef(timePassed * 90, 0, 0, 1);
+    TinyGL.glRotatef(timePassed * 180, 0, 0, 1);
 
     TinyGL.glBegin(TinyGL.TRIANGLES);
 
-    TinyGL.glColor3f(0.2, 0.2, 0.2);
-    TinyGL.glVertex3f(-0.2, -0.2, 0.2);
+    (function (s) {
+      TinyGL.glColor3f(0.2, 0.2, 0.2);
+      TinyGL.glTexCoord2f(0.0, 1.0);
+      TinyGL.glVertex3f(-s, -s, s);
+      
+      TinyGL.glColor3f(0.5, 0.5, 0.5);
+      TinyGL.glTexCoord2f(1.0, 1.0);
+      TinyGL.glVertex3f(s, -s, s);
 
-    TinyGL.glColor3f(0.5, 0.5, 0.5);
-    TinyGL.glVertex3f(0.2, -0.2, 0.2);
-
-    TinyGL.glColor3f(0.6, 0.6, 0.6);
-    TinyGL.glVertex3f(0, 0.2, 0.2);
+      TinyGL.glColor3f(0.6, 0.6, 0.6);
+      TinyGL.glTexCoord2f(1.0, 0.0);
+      TinyGL.glVertex3f(0, s, s);
+    })(0.5);
 
     TinyGL.glEnd();
     TinyGL.glPopMatrix();
@@ -795,24 +800,6 @@ void drawTriangle(JSContext *ctx) {
                            JS_EVAL_TYPE_GLOBAL);
 
   JS_FreeValue(ctx, result);
-}
-
-void draw(JSContext *ctx) {
-  // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  // glEnable(GL_TEXTURE_2D);
-  // glBindTexture(GL_TEXTURE_2D,tex);
-  // time_passed += 0.0166666;
-
-  drawTriangle(ctx);
-
-  // glColor3f(0.2, 0.2, 0.2);
-  // glVertex3f(-0.8, -0.8, 0.2);
-
-  // glColor3f(0.5, 0.5, 0.5);
-  // glVertex3f(0.8, -0.8, 0.2);
-
-  // glColor3f(0.9, 0.9, 0.9);
-  // glVertex3f(0, 1.2, 0.2);
 }
 
 void initScene() {
@@ -870,6 +857,21 @@ static JSValue js_glVertex3f(JSContext *ctx, JSValueConst this_val, int argc,
 
   // Call the actual TinyGL function
   glVertex3f((float)x, (float)y, (float)z);
+
+  return JS_UNDEFINED;
+}
+
+// Wrapper for glVertex3f
+static JSValue js_glTexCoord2f(JSContext *ctx, JSValueConst this_val, int argc,
+                               JSValueConst *argv) {
+  double x, y;
+
+  // Extract the arguments from JavaScript
+  JS_ToFloat64(ctx, &x, argv[0]);
+  JS_ToFloat64(ctx, &y, argv[1]);
+
+  // Call the actual TinyGL function
+  glTexCoord2f((float)x, (float)y);
 
   return JS_UNDEFINED;
 }
@@ -938,6 +940,8 @@ void js_tinygl_init(JSContext *ctx, JSValue ns) {
                     JS_NewCFunction(ctx, js_glColor3f, "glColor3f", 3));
   JS_SetPropertyStr(ctx, ns, "glVertex3f",
                     JS_NewCFunction(ctx, js_glVertex3f, "glVertex3f", 3));
+  JS_SetPropertyStr(ctx, ns, "glTexCoord2f",
+                    JS_NewCFunction(ctx, js_glTexCoord2f, "glTexCoord2f", 2));
   JS_SetPropertyStr(ctx, ns, "glMatrixMode",
                     JS_NewCFunction(ctx, js_glMatrixMode, "glMatrixMode", 1));
   JS_SetPropertyStr(
@@ -1140,6 +1144,7 @@ int main() {
     glTexImage2D(GL_TEXTURE_2D, 0, 3, 480, 480, 0, GL_RGB, GL_UNSIGNED_BYTE,
                  (unsigned char *)temp.data);
 
+    // Draw background
     glBegin(GL_QUADS);
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, t);
@@ -1153,7 +1158,7 @@ int main() {
     glVertex2f(-1, 1); // Top Left
     glEnd();
 
-    draw(ctx);
+    drawTriangle(ctx);
 
     // Copy the TinyGL framebuffer to the SDL texture
     void *pixels;
