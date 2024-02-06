@@ -9,7 +9,7 @@ A javascript runtime with tinygl bindings.
 
     brew install sdl2
     brew install sdl2_ttf
-    brew install clang-foramt
+    brew install clang-format
     cd third_party/quickjs && make
     cd third_party/tinygl && make
     mkdir build
@@ -19,3 +19,11 @@ A javascript runtime with tinygl bindings.
 ## Build and run
 
     make && ./QuickGL
+
+## Coding standard
+
+1. Run clang-format
+2. Don't use exceptions
+3. Keep it simple
+4. Don't crash
+5. Don't leak
