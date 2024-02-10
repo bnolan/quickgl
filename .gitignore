@@ -4,3 +4,9 @@ third_party/quickjs/*.a
 third_party/tinygl/lib/*.a
 third_party/tinygl/src/*.o
 build/**
+third_party/quickjs/examples/hello
+third_party/quickjs/examples/hello_module
+third_party/quickjs/qjs
+third_party/quickjs/qjsc
+third_party/quickjs/run-test262
+third_party/tinygl/src/libTinyGL.a
