@@ -1130,7 +1130,8 @@ int main() {
 
     // Set text to render
     std::string counterText = getCounterText(ctx, frameCount++);
-    glDrawText((unsigned char *)counterText.c_str(), 0, 0, 0xFF0000);
+    glDrawText((unsigned char *)counterText.c_str(), 35, 35, 0x313131);
+    glDrawText((unsigned char *)counterText.c_str(), 32, 32, 0xfafafa);
 
     // Copy the TinyGL framebuffer to the SDL texture
     void *pixels;
@@ -1170,7 +1171,6 @@ int main() {
 
   // Perform cleanup
   JS_FreeContext(ctx);
-  JS_FreeRuntime(rt);
 
   return 0;
 }
