@@ -1,5 +1,4 @@
 #include <SDL.h>
-#include <SDL_ttf.h>
 #include <iostream>
 #include <opencv2/objdetect.hpp> // Include the header file for object detection
 #include <opencv2/objdetect/objdetect.hpp>
@@ -1010,11 +1009,6 @@ int main() {
     return 1;
   }
 
-  if (TTF_Init() == -1) {
-    SDL_Log("TTF_Init: %s\n", TTF_GetError());
-    return 2;
-  }
-
   // Initialize OpenCV capture
   cv::VideoCapture cap(1); // Open the default camera
   if (!cap.isOpened()) {
@@ -1069,21 +1063,6 @@ int main() {
   JS_FreeValue(ctx, result);
 
   // Render...
-
-  TTF_Font *font =
-      TTF_OpenFont("../fonts/dosis.ttf", 24); // Adjust font path and size
-  if (!font) {
-    SDL_Log("Failed to load font: %s", TTF_GetError());
-    // Cleanup SDL and QuickJS
-    return 5;
-  }
-
-  // Cleanup the surface as soon as it's no longer needed
-  // SDL_FreeSurface(surface);
-
-  // Cleanup
-  // SDL_DestroyTexture(texture);
-  // TTF_CloseFont(font);
 
   bool running = true;
   SDL_Event event;
@@ -1149,6 +1128,10 @@ int main() {
 
     drawTriangle(ctx);
 
+    // Set text to render
+    std::string counterText = getCounterText(ctx, frameCount++);
+    glDrawText((unsigned char *)counterText.c_str(), 0, 0, 0xFF0000);
+
     // Copy the TinyGL framebuffer to the SDL texture
     void *pixels;
     int pitch;
@@ -1159,26 +1142,12 @@ int main() {
 
     SDL_RenderCopy(renderer, albedoTexture, NULL, NULL);
 
-    // Set text to render
-    std::string counterText = getCounterText(ctx, frameCount++);
-
-    // Off white
-    SDL_Color textColor = {220, 220, 220, 255};
-    SDL_Surface *textSurface =
-        TTF_RenderText_Blended(font, counterText.c_str(), textColor);
-    SDL_Texture *textTexture =
-        SDL_CreateTextureFromSurface(renderer, textSurface);
-
-    // Render text
-    SDL_Rect renderQuad = {50, 50, textSurface->w, textSurface->h};
-    SDL_RenderCopy(renderer, textTexture, NULL, &renderQuad);
-
     // Update screen
     SDL_RenderPresent(renderer);
 
     // Free resources
-    SDL_FreeSurface(textSurface);
-    SDL_DestroyTexture(textTexture);
+    // SDL_FreeSurface(textSurface);
+    // SDL_DestroyTexture(textTexture);
 
     SDL_Delay(1000 / 60); // Approximately 60 frames per second
 
@@ -1194,7 +1163,6 @@ int main() {
   // Cleanup SDL
   SDL_DestroyRenderer(renderer);
   SDL_DestroyWindow(window);
-  TTF_Quit();
   SDL_Quit();
 
   // Free the result value

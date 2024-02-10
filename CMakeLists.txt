@@ -10,7 +10,6 @@ set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
 # Add SDL2
 find_package(SDL2 REQUIRED)
-find_package(SDL2TTF REQUIRED)
 
 # Add OpenCV
 find_package(OpenCV REQUIRED)
@@ -35,7 +34,6 @@ target_link_libraries(QuickGL
   QuickJS 
   TinyGL
   ${SDL2_LIBRARIES}
-  ${SDL2TTF_LIBRARY}
   ${OpenCV_LIBS}
   )
 
@@ -46,6 +44,5 @@ target_include_directories(QuickGL PUBLIC
   "${PROJECT_SOURCE_DIR}/third_party/quickjs"
   "${PROJECT_SOURCE_DIR}/third_party/tinygl/include"
   ${SDL2_INCLUDE_DIRS}
-  ${SDL2TTF_INCLUDE_DIR}
   ${OpenCV_INCLUDE_DIRS}
 )
