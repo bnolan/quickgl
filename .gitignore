@@ -3,4 +3,10 @@ third_party/quickjs/.obj
 third_party/quickjs/*.a
 third_party/tinygl/lib/*.a
 third_party/tinygl/src/*.o
-
+third_party/tinygl/src/libTinyGL.a
+third_party/quickjs/examples
+third_party/quickjs/qjs
+third_party/quickjs/qjsc
+third_party/quickjs/run-test262
+build/**
+*.a

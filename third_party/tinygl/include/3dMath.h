@@ -27,8 +27,10 @@
 #include <string.h>
 typedef float f_;
 typedef unsigned int uint;
+#ifndef MIN
 #define MAX(x,y) (x>y?x:y)
 #define MIN(x,y) (x<y?x:y)
+#endif
 typedef struct {CHAD_ALIGN f_ d[3];} vec3;
 typedef struct {CHAD_ALIGN int d[3];} ivec3;
 typedef struct {CHAD_ALIGN f_ d[4];} vec4;
