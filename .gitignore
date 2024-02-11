@@ -10,3 +10,4 @@ third_party/quickjs/qjsc
 third_party/quickjs/run-test262
 build/**
 *.a
+.vscode/**
