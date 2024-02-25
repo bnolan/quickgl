@@ -11,9 +11,7 @@ A javascript runtime with (incomplete) tinygl and opencv bindings for experiment
 
 ## Configuring on MacOS
 
-    brew install sdl2
-    brew install sdl2_ttf
-    brew install clang-format
+    brew install sdl2 clang-format cmake opencv
     cd third_party/quickjs && make
     cd third_party/tinygl && make
     mkdir build

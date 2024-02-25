@@ -1,5 +1,5 @@
 #include <SDL.h>
-#include <SDL_ttf.h>
+#include <chrono>
 #include <iostream>
 #include <opencv2/objdetect.hpp> // Include the header file for object detection
 #include <opencv2/objdetect/objdetect.hpp>
@@ -782,15 +782,15 @@ void drawTriangle(JSContext *ctx) {
     TinyGL.glBegin(TinyGL.TRIANGLES);
 
     (function (s) {
-      TinyGL.glColor3f(0.2, 0.2, 0.2);
+      TinyGL.glColor3f(1, 1, 1);
       TinyGL.glTexCoord2f(0.0, 1.0);
       TinyGL.glVertex3f(-s, -s, s);
       
-      TinyGL.glColor3f(0.5, 0.5, 0.5);
+      TinyGL.glColor3f(1, 1, 1);
       TinyGL.glTexCoord2f(1.0, 1.0);
       TinyGL.glVertex3f(s, -s, s);
 
-      TinyGL.glColor3f(0.6, 0.6, 0.6);
+      TinyGL.glColor3f(1, 1, 1);
       TinyGL.glTexCoord2f(1.0, 0.0);
       TinyGL.glVertex3f(0, s, s);
     })(0.5);
@@ -1010,17 +1010,20 @@ int main() {
     return 1;
   }
 
-  if (TTF_Init() == -1) {
-    SDL_Log("TTF_Init: %s\n", TTF_GetError());
-    return 2;
-  }
-
   // Initialize OpenCV capture
-  cv::VideoCapture cap(1); // Open the default camera
+  cv::VideoCapture cap(0); // Open the default camera
   if (!cap.isOpened()) {
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't open camera");
     return 1;
   }
+
+  cap.set(cv::CAP_PROP_FRAME_WIDTH, 1280);
+  // cap.set(cv::CAP_PROP_FRAME_HEIGHT, 120);
+
+  // Check what resolution was actually set
+  double width = cap.get(cv::CAP_PROP_FRAME_WIDTH);
+  double height = cap.get(cv::CAP_PROP_FRAME_HEIGHT);
+  std::cout << "Resolution set to: " << width << "x" << height << std::endl;
 
   cv::Mat frame;
   SDL_Texture *cameraTexture = nullptr;
@@ -1070,21 +1073,6 @@ int main() {
 
   // Render...
 
-  TTF_Font *font =
-      TTF_OpenFont("../fonts/dosis.ttf", 24); // Adjust font path and size
-  if (!font) {
-    SDL_Log("Failed to load font: %s", TTF_GetError());
-    // Cleanup SDL and QuickJS
-    return 5;
-  }
-
-  // Cleanup the surface as soon as it's no longer needed
-  // SDL_FreeSurface(surface);
-
-  // Cleanup
-  // SDL_DestroyTexture(texture);
-  // TTF_CloseFont(font);
-
   bool running = true;
   SDL_Event event;
 
@@ -1096,6 +1084,8 @@ int main() {
   while (running) {
     cap >> frame; // Capture a frame
 
+    auto start = std::chrono::high_resolution_clock::now();
+
     // Convert frame to a tinygl texture
     cv::Mat frameRGB;
     cv::cvtColor(frame, frameRGB, cv::COLOR_BGR2RGB);
@@ -1104,6 +1094,7 @@ int main() {
     cv::Mat temp;
     crop.convertTo(temp, CV_8U);
 
+    /*
     std::vector<cv::Rect> faces;
     face_cascade.detectMultiScale(
         temp, faces, 1.2, 5, 0 | cv::CASCADE_SCALE_IMAGE, cv::Size(80, 80));
@@ -1116,6 +1107,7 @@ int main() {
               cv::Size(faces[i].width * 0.5, faces[i].height * 0.5), 0, 0, 360,
               cv::Scalar(255, 0, 255), 4, 8, 0);
     }
+    */
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -1149,6 +1141,23 @@ int main() {
 
     drawTriangle(ctx);
 
+    // Set text to render
+    std::string counterText = getCounterText(ctx, frameCount++);
+    glDrawText((unsigned char *)counterText.c_str(), 34, 32, 0x313131);
+    glDrawText((unsigned char *)counterText.c_str(), 32, 30, 0xfafafa);
+
+    // End time and calculate duration
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration =
+        std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+
+    std::ostringstream oss;
+    oss << "Frame time: " << duration.count() << " milliseconds." << std::endl;
+    std::string frameText = oss.str();
+
+    glDrawText((unsigned char *)frameText.c_str(), 34, 50, 0x313131);
+    glDrawText((unsigned char *)frameText.c_str(), 32, 48, 0xc0c0c0);
+
     // Copy the TinyGL framebuffer to the SDL texture
     void *pixels;
     int pitch;
@@ -1159,28 +1168,14 @@ int main() {
 
     SDL_RenderCopy(renderer, albedoTexture, NULL, NULL);
 
-    // Set text to render
-    std::string counterText = getCounterText(ctx, frameCount++);
-
-    // Off white
-    SDL_Color textColor = {220, 220, 220, 255};
-    SDL_Surface *textSurface =
-        TTF_RenderText_Blended(font, counterText.c_str(), textColor);
-    SDL_Texture *textTexture =
-        SDL_CreateTextureFromSurface(renderer, textSurface);
-
-    // Render text
-    SDL_Rect renderQuad = {50, 50, textSurface->w, textSurface->h};
-    SDL_RenderCopy(renderer, textTexture, NULL, &renderQuad);
-
     // Update screen
     SDL_RenderPresent(renderer);
 
     // Free resources
-    SDL_FreeSurface(textSurface);
-    SDL_DestroyTexture(textTexture);
+    // SDL_FreeSurface(textSurface);
+    // SDL_DestroyTexture(textTexture);
 
-    SDL_Delay(1000 / 60); // Approximately 60 frames per second
+    // SDL_Delay(1000 / 60); // Approximately 60 frames per second
 
     // time_passed += 1.0 / 60;
 
@@ -1194,7 +1189,6 @@ int main() {
   // Cleanup SDL
   SDL_DestroyRenderer(renderer);
   SDL_DestroyWindow(window);
-  TTF_Quit();
   SDL_Quit();
 
   // Free the result value
@@ -1202,7 +1196,6 @@ int main() {
 
   // Perform cleanup
   JS_FreeContext(ctx);
-  JS_FreeRuntime(rt);
 
   return 0;
 }
