@@ -4,3 +4,4 @@ third_party/quickjs/*.a
 third_party/tinygl/lib/*.a
 third_party/tinygl/src/*.o
 
+build/**
