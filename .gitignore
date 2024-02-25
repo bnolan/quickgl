@@ -12,3 +12,6 @@ third_party/quickjs/run-test262
 build/**
 *.a
 .vscode/**
+lab/emcc/index.wasm
+lab/emcc/index.html
+lab/emcc/index.js
