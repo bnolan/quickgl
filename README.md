@@ -22,6 +22,24 @@ A javascript runtime with (incomplete) tinygl and opencv bindings for experiment
 
     make && ./QuickGL
 
+## Configure for wasm
+
+1. install emscripten/emcc
+2. clone opencv-4.9 sources
+3. install python@3.11
+4. `export EMSCRIPTEN=...`
+5. Apply [build fix](https://github.com/opencv/opencv/issues/19493#issuecomment-857167996) to emscripten
+5. `emcmake python ./opencv/platforms/js/build_js.py build_js``
+
+(This expects that you have `/Users/you/Projects/build/opencv` and `/Users/you/Projects/build/build_js`)
+
+## Build for wasm
+
+    cd lab/emcc
+    make
+    make http
+    open localhost:8000
+
 ## Coding standard
 
 1. Run clang-format
