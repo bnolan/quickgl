@@ -22,6 +22,10 @@ A javascript runtime with (incomplete) tinygl and opencv bindings for experiment
 
     make && ./QuickGL
 
+## Configuring for Web
+
+    Install [emscripten](https://emscripten.org/docs/getting_started/downloads.html)
+
 ## Coding standard
 
 1. Run clang-format
